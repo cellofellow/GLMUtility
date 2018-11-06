@@ -4,6 +4,8 @@
 """
 import copy
 import math
+import pickle
+import io
 
 import pandas as pd
 import numpy as np
@@ -113,7 +115,7 @@ class GLMBase:
         additional_fields=None,
         base_dict_override={}
     ):
-        if independent is not None and dependent is not None and weight is not None:
+        if all(i is not None for i in [independent, dependent, weight]):
             self.data = data.reset_index().drop("index", axis=1)
             # make it a list of one if user only passed a single column
             independent = (
@@ -155,6 +157,35 @@ class GLMBase:
             ).__dict__.copy()
         else:
             raise TypeError("GLM constructor not properly called.")
+
+    def as_ui(self) -> 'glmutility.ui.GLM':
+        """
+        Downcast a base.GLMBase instance to a ui.GLM instance.
+        Use this when loading from a pickle.
+        Does nothing if called on a ui.GLM.
+        """
+        from glmutility.ui import GLM
+        if isinstance(self, GLM):
+            return self
+        cast = GLM.__new__(GLM)
+        cast.__dict__ = self.__dict__.copy()
+        return cast
+
+    def as_base(self) -> 'GLMBase':
+        return self
+
+    def pickle(self, f: io.RawIOBase):
+        """
+        Pickle a ui.GLM or GLMBase as a GLMBase
+        """
+        pickle.dump(self.as_base(), f)
+
+    @classmethod
+    def unpickle(cls, f: io.RawIOBase) -> 'GLMBase':
+        """
+        Unpickle a ui.GLM or GLMBase as a GLMBase
+        """
+        return pickle.load(f).as_base()
 
     def _import_model(self, file_name):
         "Loads model structure from a yaml config file"
@@ -700,7 +731,9 @@ class GLMBase:
         return gini
 
     def __repr__(self):
-        return self.results.summary()
+        if getattr(self, 'results', None):
+            return self.results.summary()
+        return super().__repr__()
 
     def summary(self):
         """Returns the statsmodel.api model summary"""

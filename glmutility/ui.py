@@ -4,6 +4,8 @@
 """
 import copy
 import math
+import io
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -19,10 +21,25 @@ from bokeh.models import HoverTool, NumeralTickFormatter
 import ipywidgets as widgets
 from ipywidgets import interactive, fixed
 
-from .base import GLMBase
+from glmutility.base import GLMBase
 
 
 class GLM(GLMBase):
+    def as_base(self) -> GLMBase:
+        """
+        Upcast this GLM UI instance to a GLMBase instance for pickling.
+        """
+        cast = GLMBase.__new__(GLMBase)
+        cast.__dict__ = self.__dict__.copy()
+        return cast
+
+    @classmethod
+    def unpickle(self, f: io.RawIOBase) -> 'GLM':
+        """
+        Unpickle a ui.GLM or GLMBase as a ui.GLM
+        """
+        return pickle.load(f).as_ui()
+
     def view(self, data=None):
         """The main UI of the GLMUtility"""
 
