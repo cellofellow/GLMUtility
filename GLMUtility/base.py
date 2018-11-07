@@ -110,7 +110,7 @@ class GLMBase:
         family="Poisson",
         link="Log",
         scale="X2",
-        tweedie_var_power = 1.0,
+        tweedie_var_power=1.0,
         glm_config=None,
         additional_fields=None,
         base_dict_override={}
@@ -130,7 +130,7 @@ class GLMBase:
             self.tweedie_var_power = tweedie_var_power
             self.base_dict = {}
             for item in self.independent:
-                self.base_dict[item] = self._set_base_level(data[item],base_dict_override)
+                self.base_dict[item] = self._set_base_level(data[item], base_dict_override)
             self.PDP = None
             self.variates = {}
             self.customs = {}
@@ -207,7 +207,10 @@ class GLMBase:
         return
 
     def _construct_model(self, train, glm_config, additional_fields=None):
-        "Constructs a model from a yaml config file"
+        """
+        Constructs a model from a yaml config file
+        ERROR: this currently isnt' working since we broke out UI and GLM
+        """
         if additional_fields is not None:
             list_1 = glm_config["structure"]["independent"]
             list_2 = additional_fields
