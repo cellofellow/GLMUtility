@@ -736,7 +736,7 @@ class GLMBase:
     def __repr__(self):
         if getattr(self, 'results', None):
             return self.results.summary()
-        return super().__repr__()
+        return '<GLM>'
 
     def summary(self):
         """Returns the statsmodel.api model summary"""
